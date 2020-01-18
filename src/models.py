@@ -7,31 +7,57 @@ from torch.autograd import Variable
 import json
 import pickle as p
 from tqdm.autonotebook import tqdm, trange
+from pathlib import *
 
 
 class Config():
-  def __init__(self):
-    super(Config, self)
-    self.set_default()
-    self.save_file()
+
+    instance = None
+
+    def __init__(self, path):
+        path = Path(path)
+        if path.exists and path.is_dir:
+            if 'config.json' in path.iterdir:
+                Config.instance = load_file(path)
+            else:
+                raise NameError('Config.json not found in path. Use create_default')
+        else:
+            raise NameError('Path not found')
+
+    def create_default():
+        cb = Config('./')
+        cb.instance.set_default()
+        return cb
+    
+
+    class __Config(): 
   
-  def set_default(self):
-    self.bert_max_tokens = 256
-    self.bert_model_dim = 512
-    self.bert_layers = 4
-    self.bert_multi_head = 1
-    self.classifier_layer = 5
-    self.classifier_hidden_size = 1024
-    self.reduced_dimension = 32
-    self.numb_of_classes = 1
-    self.config_directory = 'configLB.json'
-    self.debug_mode = True
+        def __init__(self):
+          super(__Config, self)
+          self.set_default()
+          self.save_file()
 
-  def save_file(self):
-    with open(self.config_directory, 'w') as fp:
-      json.dump(self, fp, default = lambda o: o.__dict__,
-                sort_keys=True, indent=4)
+        def set_default(self):
+          self.bert_max_tokens = 256
+          self.bert_model_dim = 512
+          self.bert_layers = 4
+          self.bert_multi_head = 1
+          self.classifier_layer = 5
+          self.classifier_hidden_size = 1024
+          self.reduced_dimension = 32
+          self.numb_of_classes = 1
+          self.config_directory = 'configLB.json'
+          self.debug_mode = True
 
+    def save_file(self):
+      with open(self.config_directory, 'w') as fp:
+        json.dump(self.instance, fp, default = lambda o: o.__dict__,
+                  sort_keys=True, indent=4)
+ 
+    def load_file(self, path: Path):
+        with path.joinpath('config.json').open('r') as fp:
+            c = json.load(fp, indent=4)
+        return c
 
 class LightBertBasedClassifier(torch.nn.Module):
   '''
