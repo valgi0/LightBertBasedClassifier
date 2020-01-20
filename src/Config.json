@@ -1,0 +1,12 @@
+{
+    "bert_layers": 4,
+    "bert_max_tokens": 256,
+    "bert_model_dim": 512,
+    "bert_multi_head": 1,
+    "classifier_hidden_size": 1024,
+    "classifier_layer": 5,
+    "config_directory": "configLB.json",
+    "debug_mode": true,
+    "numb_of_classes": 1,
+    "reduced_dimension": 32
+}

@@ -12,30 +12,10 @@ from pathlib import *
 
 class Config():
 
-    instance = None
-
-    def __init__(self, path):
-        path = Path(path)
-        if path.exists and path.is_dir:
-            if 'config.json' in path.iterdir:
-                Config.instance = load_file(path)
-            else:
-                raise NameError('Config.json not found in path. Use create_default')
-        else:
-            raise NameError('Path not found')
-
-    def create_default():
-        cb = Config('./')
-        cb.instance.set_default()
-        return cb
-    
-
-    class __Config(): 
+    class ConfigIn(): 
   
         def __init__(self):
-          super(__Config, self)
           self.set_default()
-          self.save_file()
 
         def set_default(self):
           self.bert_max_tokens = 256
@@ -48,14 +28,32 @@ class Config():
           self.numb_of_classes = 1
           self.config_directory = 'configLB.json'
           self.debug_mode = True
+    
+    instance = None
 
-    def save_file(self):
-      with open(self.config_directory, 'w') as fp:
+    def __init__(self, path='./', default = False):
+        path = Path(path)
+        if path.exists and path.is_dir and not default:
+            if path.joinpath('Config.json').exists:
+                Config.instance = self.load_file(path)
+            else:
+                raise NameError('Config.json not found in path. Use default to create a new one')
+        elif default:
+            Config.instance = self.ConfigIn()
+            if path.exists and path.is_dir:
+                self.save_file(path.joinpath('Config.json'))
+                print('File Config.json saved at {}'.format(str(path)))
+            else:
+                raise NameError('Path not found')
+
+
+    def save_file(self, path = './'):
+      with open(path, 'w') as fp:
         json.dump(self.instance, fp, default = lambda o: o.__dict__,
                   sort_keys=True, indent=4)
  
-    def load_file(self, path: Path):
-        with path.joinpath('config.json').open('r') as fp:
+    def load_file(self, path):
+        with path.open('r') as fp:
             c = json.load(fp, indent=4)
         return c
 
@@ -191,3 +189,5 @@ class LightBertBasedClassifier(torch.nn.Module):
       print(debug_string.format(str(out)))
     final = self.classifier(out)
     return final
+
+
