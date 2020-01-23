@@ -49,10 +49,18 @@ ap.add_argument(
     help='Configuration file for the Net'
 )
 
+ap.add_argument(
+    '--data_folder',
+    required = True,
+    type=str,
+    help='Folder containing the data for the train and test'
+)
+
 args = ap.parse_args()
 
+def main():
+    print(args)
 
 
-
-                    
-  
+if __name__ == '__main__':
+    main()  
