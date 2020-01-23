@@ -14,8 +14,11 @@ class Config():
 
     class ConfigIn(): 
   
-        def __init__(self):
-          self.set_default()
+        def __init__(self, data=None):
+          if data == None:
+              self.set_default()
+          else:
+              self.set_value(data)
 
         def set_default(self):
           self.bert_max_tokens = 256
@@ -28,14 +31,20 @@ class Config():
           self.numb_of_classes = 1
           self.config_directory = 'configLB.json'
           self.debug_mode = True
-    
+       
+        def set_value(self, valuesdict):
+            for k,v in valuesdict.items():
+                setattr(self, k, v)
+
+ 
     instance = None
 
     def __init__(self, path='./', default = False):
         path = Path(path)
         if path.exists and path.is_dir and not default:
             if path.joinpath('Config.json').exists:
-                Config.instance = self.load_file(path)
+                data = self.load_file(path.joinpath('Config.json'))
+                Config.instance = self.ConfigIn(data = data)
             else:
                 raise NameError('Config.json not found in path. Use default to create a new one')
         elif default:
@@ -46,6 +55,8 @@ class Config():
             else:
                 raise NameError('Path not found')
 
+    def get_config_object(self):
+        return Config.instance
 
     def save_file(self, path = './'):
       with open(path, 'w') as fp:
@@ -54,7 +65,7 @@ class Config():
  
     def load_file(self, path):
         with path.open('r') as fp:
-            c = json.load(fp, indent=4)
+            c = json.load(fp)
         return c
 
 class LightBertBasedClassifier(torch.nn.Module):
